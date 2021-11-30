@@ -6,15 +6,14 @@ const Intern = require('./lib/Intern');
 const Engineer = require('./lib/Engineer');
 
 const inquirer = require('inquirer');
+const generatePage = require('./src/page-template');
+// const { writeFile, copyFile } = require('./utils/generate-site.js');
 
 var employeeArr = [];
-// var position = 'manager';
 
 
-
-const managerInfo = () => {
-  return inquirer
-    .prompt([
+function managerInfo() {
+  inquirer.prompt([
       {
         type: 'input',
         name: 'name',
@@ -70,18 +69,15 @@ const managerInfo = () => {
     ])
 
     .then(managerInput => {
-      const { name, ID, email, officeNumber } = managerInput;
-      const manager = new Manager(name, ID, email, officeNumber)
-
-      // position = managerInput.anotherEmp
-      // console.log(position);
+      // const { name, ID, email, officeNumber } = managerInput;
+      const manager = new Manager(managerInput.name, managerInput.ID, managerInput.email, managerInput.officeNumber)
 
       employeeArr.push(manager);
       console.log(employeeArr);
 
       createTeamMember();
 
-      return;
+      // return;
     }
     )
 }
@@ -161,9 +157,8 @@ const internInfo = () => {
 
 
 
-const engineerInfo = () => {
-  return inquirer
-    .prompt([
+function engineerInfo() {
+  inquirer.prompt([
       {
         type: 'input',
         name: 'name',
@@ -233,6 +228,24 @@ const engineerInfo = () => {
     )
 }
 
+// function to write all of the html to make the page writing files
+const writeFile = fileContent => {
+  return new Promise((resolve, reject) => {
+    fs.writeFile('./dist/index.html', fileContent, err => {
+      if (err) {
+        reject(err);
+        return;
+      }
+
+      resolve({
+        ok: true,
+        message: 'File created!'
+      });
+    });
+  });
+};
+
+
 const createTeamMember = () => {
   return inquirer
     .prompt([
@@ -246,37 +259,22 @@ const createTeamMember = () => {
       .then(newMember => {
       switch (newMember.anotherEmp) {
         case 'intern': internInfo();
-          break;
+          // break;
         case 'engineer': engineerInfo();
-          break;
-        case 'none': return;
-      }
-    })
+          // break;
+        case 'none': break;
+      }})
 
+      .then(generatePage(employeeArr))
+            // .then(pageHTML => {
+            //   return writeFile(pageHTML);
+            // });  
+            .then(pageHTML => {
+                console.log(pageHTML);
+              });  
+          }
+      
 
-}
 managerInfo();
-
-
-
-
-
-  //function to write all of the html to make the page
-  // writing files
-// const writeFile = fileContent => {
-//   return new Promise((resolve, reject) => {
-//     fs.writeFile('./dist/index.html', fileContent, err => {
-//       if (err) {
-//         reject(err);
-//         return;
-//       }
-
-//       resolve({
-//         ok: true,
-//         message: 'File created!'
-//       });
-//     });
-//   });
-// };
 
 
