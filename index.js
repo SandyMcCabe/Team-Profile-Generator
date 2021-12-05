@@ -7,11 +7,10 @@ const Engineer = require('./lib/Engineer');
 
 const inquirer = require('inquirer');
 const generatePage = require('./src/page-template');
-// const { writeFile, copyFile } = require('./utils/generate-site.js');
 
 var employeeArr = [];
 
-
+// gather information on the manager 
 function managerInfo() {
   inquirer.prompt([
       {
@@ -68,12 +67,12 @@ function managerInfo() {
       }
     ])
 
+    // process manager's information
     .then(managerInput => {
-      // const { name, ID, email, officeNumber } = managerInput;
       const manager = new Manager(managerInput.name, managerInput.ID, managerInput.email, managerInput.officeNumber)
 
       employeeArr.push(manager);
-      console.log(employeeArr);
+      // console.log(employeeArr);
 
       createTeamMember();
 
@@ -82,7 +81,7 @@ function managerInfo() {
     )
 }
 
-
+// gather and process information for an intern
 const internInfo = () => {
   return inquirer
     .prompt([
@@ -141,11 +140,11 @@ const internInfo = () => {
     ])
 
     .then(internInput => {
-      const { name, ID, email, school } = internInput;
-      const intern = new Intern(name, ID, email, school)
+      const { name, id, email, school } = internInput;
+      const intern = new Intern(internInput.name, internInput.id, internInput.email, internInput.school)
 
       employeeArr.push(intern);
-      console.log(employeeArr);
+      // console.log(employeeArr);
 
       createTeamMember();
 
@@ -155,8 +154,7 @@ const internInfo = () => {
     )
 }
 
-
-
+// gather and process information for engineers
 function engineerInfo() {
   inquirer.prompt([
       {
@@ -215,11 +213,11 @@ function engineerInfo() {
     ])
 
     .then(engineerInput => {
-      const { name, ID, email, github } = engineerInput;
-      const engineer = new Engineer(name, ID, email, github)
+      const { name, id, email, github } = engineerInput;
+      const engineer = new Engineer(engineerInput.name, engineerInput.id, engineerInput.email, engineerInput.github)
 
       employeeArr.push(engineer);
-      console.log(employeeArr);
+      // console.log(employeeArr);
 
       createTeamMember();
 
@@ -227,6 +225,7 @@ function engineerInfo() {
     }
     )
 }
+
 
 // function to write all of the html to make the page writing files
 const writeFile = fileContent => {
@@ -236,7 +235,6 @@ const writeFile = fileContent => {
         reject(err);
         return;
       }
-
       resolve({
         ok: true,
         message: 'File created!'
@@ -245,7 +243,7 @@ const writeFile = fileContent => {
   });
 };
 
-
+// the loop to rerun the prompts until all employees are entered
 const createTeamMember = () => {
   return inquirer
     .prompt([
@@ -255,26 +253,25 @@ const createTeamMember = () => {
         message: "Would you like to add another employee?",
         choices: ['engineer', 'intern', 'none']
       }])
-
       .then(newMember => {
-      switch (newMember.anotherEmp) {
-        case 'intern': internInfo();
-          // break;
-        case 'engineer': engineerInfo();
-          // break;
-        case 'none': break;
-      }})
+        switch (newMember.anotherEmp) {
+          case 'intern': internInfo();
+            break;
+          case 'engineer': engineerInfo();
+            break;
+          case 'none':
+            var htmlString = generatePage(employeeArr)
+            // console.log(htmlString) //let's start with this!
+              writeFile(htmlString);
+            break;
+        }
+        
+      }
+       )
 
-      .then(generatePage(employeeArr))
-            // .then(pageHTML => {
-            //   return writeFile(pageHTML);
-            // });  
-            .then(pageHTML => {
-                console.log(pageHTML);
-              });  
-          }
+ }
       
-
+// start with obtaining the info on the manager
 managerInfo();
 
 
